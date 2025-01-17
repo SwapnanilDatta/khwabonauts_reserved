@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Matches Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Donor Matches for {{ recipient.full_name }}</h1>
+    <p>Recipient Location: {{ recipient.latitude }}, {{ recipient.longitude }}</p>
+    <div id="map"></div>
+
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([{{ recipient.latitude }}, {{ recipient.longitude }}], 8);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add marker for the recipient
+        var recipientMarker = L.marker([{{ recipient.latitude }}, {{ recipient.longitude }}])
+            .addTo(map)
+            .bindPopup("<strong>Recipient: {{ recipient.full_name }}</strong>")
+            .openPopup();
+
+        // Add markers for donors
+        var donors = {{ matches | tojson }};
+        donors.forEach(function(donor) {
+            L.marker([donor.latitude, donor.longitude])
+                .addTo(map)
+                .bindPopup(
+                    `<strong>Donor: ${donor.name}</strong><br>
+                    Organ: ${donor.organ}<br>
+                    Location: ${donor.latitude}, ${donor.longitude}`
+                );
+        });
+    </script>
+</body>
+</html>

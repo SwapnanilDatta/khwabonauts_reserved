@@ -1,0 +1,241 @@
+<!-- filepath: /templates/confirmation_card.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Card - LifeLink</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a192f;
+            color: #8892b0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .donor-info {
+            background: rgba(17, 34, 64, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #64ffda;
+            margin-bottom: 1.5rem;
+        }
+
+        .donor-info p {
+            margin: 1rem 0;
+            font-size: 1.1rem;
+        }
+
+        .request-container {
+            background: rgba(17, 34, 64, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+        }
+
+        .request-card {
+            background: rgba(10, 25, 47, 0.7);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 255, 218, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .accept-btn, .decline-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .accept-btn {
+            background: rgba(100, 255, 218, 0.1);
+            color: #64ffda;
+            border: 1px solid #64ffda;
+        }
+
+        .decline-btn {
+            background: rgba(255, 100, 100, 0.1);
+            color: #ff6464;
+            border: 1px solid #ff6464;
+        }
+
+        .accept-btn:hover {
+            background: rgba(100, 255, 218, 0.2);
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.4);
+        }
+
+        .decline-btn:hover {
+            background: rgba(255, 100, 100, 0.2);
+            box-shadow: 0 0 15px rgba(255, 100, 100, 0.4);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification.success {
+            background: rgba(76, 175, 80, 0.9);
+            border: 1px solid #4CAF50;
+        }
+
+        .notification.error {
+            background: rgba(244, 67, 54, 0.9);
+            border: 1px solid #f44336;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Donor Profile</h1>
+    <div class="donor-info">
+        <p><strong>Name:</strong> {{ full_name }}</p>
+        <p><strong>Email:</strong> {{ email }}</p>
+        <p><strong>Blood Type:</strong> {{ blood_type }}</p>
+        <p><strong>Organ:</strong> {{ organ }}</p>
+        <p><strong>Age:</strong> {{ age }}</p>
+    </div>
+
+    <div class="request-container">
+        <h1>Pending Requests</h1>
+        <div id="pending-requests"></div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const socket = io({
+            path: '/socket.io',
+            transports: ['websocket', 'polling'],
+            secure: true,
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        });
+
+        function loadPendingRequests() {
+            const donorId = '{{ donor_id }}';
+            fetch(`/requests/${donorId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response error');
+                    return response.json();
+                })
+                .then(requests => {
+                    const container = document.getElementById('pending-requests');
+                    if (requests.length === 0) {
+                        container.innerHTML = '<p>No pending requests</p>';
+                        return;
+                    }
+                    container.innerHTML = requests.map(request => `
+                        <div class="request-card" id="request-${request.id}">
+                            <p><strong>From:</strong> ${request.recipient_name}</p>
+                            <p><strong>Status:</strong> ${request.status}</p>
+                            <div class="action-buttons">
+                                <button class="accept-btn" onclick="handleRequest(${request.id}, 'accept')">Accept</button>
+                                <button class="decline-btn" onclick="handleRequest(${request.id}, 'decline')">Decline</button>
+                            </div>
+                        </div>
+                    `).join('');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Failed to load requests', 'error');
+                });
+        }
+
+        function handleRequest(requestId, action) {
+            fetch('/handle_request', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({request_id: requestId, action: action})
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response error');
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showNotification(`Request ${action}ed successfully`, 'success');
+                    loadPendingRequests();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error processing request', 'error');
+            });
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.className = `notification ${type} show`;
+            notification.textContent = message;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Socket event handlers
+        socket.on('connect', () => {
+            console.log('Connected to WebSocket');
+            socket.emit('join', {room: '{{ donor_id }}'});
+            loadPendingRequests();
+        });
+
+        socket.on('request_update', (data) => {
+            loadPendingRequests();
+            showNotification(`Request ${data.status} successfully`);
+        });
+
+        socket.on('new_request', () => {
+            loadPendingRequests();
+            showNotification('New donation request received', 'success');
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('Connection Error:', error);
+            showNotification('Connection error. Retrying...', 'error');
+        });
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', loadPendingRequests);
+    </script>
+</body>
+</html>

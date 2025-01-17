@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - LifeLink</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #0a192f;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .register-container {
+            background: rgba(17, 34, 64, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #64ffda;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #8892b0;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #233554;
+            background: #0a192f;
+            color: #fff;
+            border-radius: 4px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: #64ffda;
+            color: #0a192f;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .redirect-text {
+            text-align: center;
+            color: #8892b0;
+        }
+
+        .redirect-text a {
+            color: #64ffda;
+            text-decoration: none;
+        }
+
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 0.5rem;
+            background: #0a192f;
+            color: #fff;
+            border: 1px solid #233554;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .file-hint {
+            display: block;
+            font-size: 0.8rem;
+            color: #8892b0;
+            margin-top: 0.3rem;
+        }
+
+        input[type="file"]::file-selector-button {
+            background: #64ffda;
+            color: #0a192f;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2>Register for LifeLink</h2>
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="user_type">Register as</label>
+                <select id="user_type" name="user_type" required>
+                    <option value="donor">Donor</option>
+                    <option value="recipient">Recipient</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="medical_cert">Medical Certificate</label>
+                <input type="file" 
+                       id="medical_cert" 
+                       name="medical_cert" 
+                       accept=".pdf,.jpg,.jpeg,.png"
+                       >
+                <span class="file-hint">Upload hospital certificate (PDF/JPG/PNG)</span>
+            </div>
+            <div class="form-group">
+                <label for="govt_id">Government ID</label>
+                <input type="file" 
+                       id="govt_id" 
+                       name="govt_id" 
+                       accept=".pdf,.jpg,.jpeg,.png"
+                       >
+                <span class="file-hint">Upload valid government ID (PDF/JPG/PNG)</span>
+            </div>
+            <button type="submit" class="submit-btn">Register</button>
+            <p class="redirect-text">Already have an account? <a href="/login">Login here</a></p>
+        </form>
+    </div>
+</body>
+</html>

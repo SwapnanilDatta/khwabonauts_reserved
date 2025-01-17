@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #0a192f;
+            color: #8892b0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            color: #64ffda;
+            margin-bottom: 1rem;
+        }
+
+        .section {
+            background: rgba(17, 34, 64, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #233554;
+        }
+
+        th {
+            color: #64ffda;
+        }
+
+        .approve-btn {
+            background: rgba(100, 255, 218, 0.1);
+            color: #64ffda;
+            border: 1px solid #64ffda;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .approve-btn:hover {
+            background: rgba(100, 255, 218, 0.2);
+            box-shadow: 0 0 15px rgba(100, 255, 218, 0.4);
+        }
+        .delete-btn {
+    background: rgba(255, 99, 71, 0.1);
+    color: #ff6347;
+    border: 1px solid #ff6347;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    background: rgba(255, 99, 71, 0.2);
+    box-shadow: 0 0 15px rgba(255, 99, 71, 0.4);
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Panel</h1>
+        
+        <div class="section">
+            <h2>Pending Donors</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Blood Type</th>
+                        <th>Organ</th>
+                        <th>Age</th>
+                        <th>Location</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donor in pre_donors %}
+                    <tr>
+                        <td>{{ donor[1] }}</td>
+                        <td>{{ donor[2] }}</td>
+                        <td>{{ donor[3] }}</td>
+                        <td>{{ donor[4] }}</td>
+                        <td>{{ donor[5] }}</td>
+                        <td>{{ donor[6] }}, {{ donor[7] }}</td>
+                        <td>
+                            <form action="{{ url_for('approve_donor', donor_id=donor[0]) }}" method="POST">
+                                <button type="submit" class="approve-btn">Approve</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Pending Recipients</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Blood Type</th>
+                        <th>Needed Organ</th>
+                        <th>Urgency</th>
+                        <th>Age</th>
+                        <th>Location</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for recipient in pre_recipients %}
+                    <tr>
+                        <td>{{ recipient[1] }}</td>
+                        <td>{{ recipient[2] }}</td>
+                        <td>{{ recipient[3] }}</td>
+                        <td>{{ recipient[4] }}</td>
+                        <td>{{ recipient[5] }}</td>
+                        <td>{{ recipient[6] }}</td>
+                        <td>{{ recipient[7] }}, {{ recipient[8] }}</td>
+                        <td>
+                            <form action="{{ url_for('approve_recipient', recipient_id=recipient[0]) }}" method="POST">
+                                <button type="submit" class="approve-btn">Approve</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="section">
+            <h2>Registered Users</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>User Type</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user[1] }}</td>
+                        <td>{{ user[3] }}</td>
+                        <td>
+                            <form action="{{ url_for('delete_user', user_id=user[0]) }}" method="POST">
+                                <button type="submit" class="delete-btn">Delete User</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Add this section after other tables -->
+<div class="section">
+    <h2>Approved Matches</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Donor Name</th>
+                <th>Recipient Name</th>
+                <th>Organ</th>
+                <th>Match Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in matches %}
+            <tr>
+                <td>{{ match[1] }}</td>
+                <td>{{ match[2] }}</td>
+                <td>{{ match[3] }}</td>
+                <td>{{ match[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+    </div>
+</body>
+</html>
